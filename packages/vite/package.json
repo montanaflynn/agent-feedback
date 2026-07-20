@@ -1,0 +1,44 @@
+{
+  "name": "@agent-feedback/vite",
+  "version": "0.1.0",
+  "description": "Vite plugin for Agent Feedback.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/montanaflynn/agent-feedback.git",
+    "directory": "packages/vite"
+  },
+  "homepage": "https://github.com/montanaflynn/agent-feedback#readme",
+  "bugs": "https://github.com/montanaflynn/agent-feedback/issues",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean --external vite",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@agent-feedback/core": "^0.1.0"
+  },
+  "peerDependencies": {
+    "vite": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "name": "@agent-feedback/next",
+  "version": "0.1.0",
+  "description": "Next.js integration for Agent Feedback.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/montanaflynn/agent-feedback.git",
+    "directory": "packages/next"
+  },
+  "homepage": "https://github.com/montanaflynn/agent-feedback#readme",
+  "bugs": "https://github.com/montanaflynn/agent-feedback/issues",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js"
+    },
+    "./route": {
+      "types": "./dist/route.d.ts",
+      "import": "./dist/route.js"
+    },
+    "./resolve": {
+      "types": "./dist/resolve.d.ts",
+      "import": "./dist/resolve.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup src/client.tsx src/route.ts src/resolve.ts --format esm --dts --clean --splitting false --external react --external next",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@agent-feedback/core": "^0.1.0",
+    "@agent-feedback/react": "^0.1.0"
+  },
+  "peerDependencies": {
+    "next": ">=14",
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

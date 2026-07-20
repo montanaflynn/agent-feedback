@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "baseUrl": ".",
+    "declaration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": true,
+    "noUncheckedIndexedAccess": true,
+    "paths": {
+      "@agent-feedback/core": ["packages/core/src/index.ts"],
+      "@agent-feedback/core/browser": ["packages/core/src/browser.ts"],
+      "@agent-feedback/core/server": ["packages/core/src/server.ts"],
+      "@agent-feedback/next": ["packages/next/src/client.tsx"],
+      "@agent-feedback/react": ["packages/react/src/index.ts"],
+      "@agent-feedback/vite": ["packages/vite/src/index.ts"]
+    },
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022",
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    "packages/**/*.ts",
+    "packages/**/*.tsx",
+    "vitest.config.ts"
+  ]
+}

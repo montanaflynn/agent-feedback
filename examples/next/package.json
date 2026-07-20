@@ -1,0 +1,22 @@
+{
+  "name": "@agent-feedback/example-next",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --hostname 127.0.0.1 --port 4174",
+    "predev": "npm run build:packages --prefix ../.."
+  },
+  "dependencies": {
+    "@agent-feedback/next": "*",
+    "next": "^16.2.10",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "typescript": "^5.8.3"
+  }
+}

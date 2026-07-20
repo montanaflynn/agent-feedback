@@ -1,0 +1,41 @@
+{
+  "name": "agent-feedback-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Leave comments on your live app. Your coding agent resolves them.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/montanaflynn/agent-feedback.git"
+  },
+  "homepage": "https://github.com/montanaflynn/agent-feedback#readme",
+  "bugs": "https://github.com/montanaflynn/agent-feedback/issues",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "npm run build:packages && npm run build:examples",
+    "build:examples": "npm run build -w @agent-feedback/example-vite && npm run build -w @agent-feedback/example-next",
+    "build:packages": "npm run build -w @agent-feedback/core && npm run build -w @agent-feedback/react && npm run build -w @agent-feedback/vite && npm run build -w @agent-feedback/next && npm run build -w @agent-feedback/cli",
+    "clean": "npm run clean --workspaces --if-present",
+    "dev:next": "npm run dev -w @agent-feedback/example-next",
+    "dev:vite": "npm run dev -w @agent-feedback/example-vite",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm test && npm run build"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "@types/react": "^19.1.6",
+    "jsdom": "^26.1.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vite": "^8.1.5",
+    "vitest": "^3.2.4"
+  }
+}

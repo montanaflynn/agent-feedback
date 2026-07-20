@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+.agent-feedback/
+.next/
+*.tsbuildinfo
+.DS_Store

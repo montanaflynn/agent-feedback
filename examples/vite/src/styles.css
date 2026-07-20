@@ -1,0 +1,126 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700&display=swap");
+
+:root {
+  font-family: "DM Sans", sans-serif;
+  color: #173128;
+  background: #f4f0e8;
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button, a { font: inherit; }
+button { color: inherit; }
+a { color: inherit; text-decoration: none; }
+main { min-height: 100vh; padding: 0 5vw 48px; }
+
+.site-header {
+  display: flex;
+  align-items: center;
+  min-height: 82px;
+  border-bottom: 1px solid #1731281c;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 700 19px "Manrope", sans-serif;
+}
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px 10px 10px 2px;
+  color: #f4f0e8;
+  background: #315c45;
+}
+nav { display: flex; gap: 32px; margin: 0 auto; color: #697770; font-size: 14px; }
+nav a { padding: 31px 0 27px; border-bottom: 2px solid transparent; }
+nav a.active { color: #173128; border-color: #d66a3b; }
+.avatar {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  color: #173128;
+  background: #dbe6d5;
+  font-weight: 700;
+}
+.hero {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 72px 0 36px;
+}
+.eyebrow {
+  margin: 0 0 8px;
+  color: #75827a;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+h1, h2, p { margin-top: 0; }
+h1 {
+  max-width: 680px;
+  margin-bottom: 14px;
+  font: 600 clamp(40px, 6vw, 70px)/1.02 "Manrope", sans-serif;
+  letter-spacing: -.055em;
+}
+.lede { max-width: 580px; margin-bottom: 0; color: #68766e; font-size: 17px; }
+.primary-action {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 10px;
+  padding: 13px 18px;
+  color: #fff;
+  background: #d66a3b;
+  box-shadow: 0 8px 24px #d66a3b33;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  border: 1px solid #1731281c;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fffdf8;
+}
+.metric { padding: 26px 28px; border-left: 1px solid #1731281c; }
+.metric:first-child { border-left: 0; }
+.metric p { margin-bottom: 18px; color: #75827a; font-size: 13px; }
+.metric strong { display: block; margin-bottom: 8px; font: 600 30px "Manrope", sans-serif; }
+.metric span { color: #809087; font-size: 12px; }
+.metric.featured span { color: #3c7b55; }
+.lower-grid { display: grid; grid-template-columns: 1.45fr 1fr; gap: 20px; margin-top: 20px; }
+.panel { min-height: 330px; border: 1px solid #1731281c; border-radius: 16px; padding: 26px; background: #fffdf8; }
+.panel-heading { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.panel-heading h2 { font: 600 19px "Manrope", sans-serif; }
+.panel-heading a { color: #d66a3b; font-size: 13px; font-weight: 700; }
+.ghost-button { border: 1px solid #17312822; border-radius: 8px; padding: 8px 10px; background: transparent; font-size: 12px; }
+.chart { display: flex; align-items: end; gap: 18px; height: 220px; padding-top: 26px; }
+.bar-column { display: flex; flex: 1; flex-direction: column; justify-content: end; height: 100%; gap: 10px; color: #8b968f; font-size: 11px; text-align: center; }
+.bar { min-height: 12px; border-radius: 7px 7px 2px 2px; background: #dbe6d5; }
+.bar-column:last-child .bar { background: #d66a3b; }
+.activity-list { list-style: none; margin: 18px 0 0; padding: 0; }
+.activity-list li { display: flex; align-items: center; gap: 12px; padding: 15px 0; border-top: 1px solid #17312812; }
+.company-dot { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: #eff1e8; font-weight: 700; }
+.activity-name { display: flex; flex-direction: column; gap: 2px; }
+.activity-name strong { font-size: 13px; }
+.activity-name small { color: #8b968f; }
+.amount { margin-left: auto; color: #3c7b55; font-size: 13px; }
+.example-note { margin: 24px 0 0; color: #78847d; font-size: 12px; text-align: center; }
+
+@media (max-width: 760px) {
+  nav { display: none; }
+  .avatar { margin-left: auto; }
+  .hero { align-items: start; flex-direction: column; padding-top: 48px; }
+  .lower-grid { grid-template-columns: 1fr; }
+  .metric { padding: 20px 16px; }
+  .metric strong { font-size: 24px; }
+}

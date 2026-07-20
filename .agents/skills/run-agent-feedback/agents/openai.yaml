@@ -1,0 +1,4 @@
+interface:
+  display_name: "Run Agent Feedback"
+  short_description: "Launch and monitor visual UI feedback"
+  default_prompt: "Use $run-agent-feedback to launch this app and respond to visual feedback."

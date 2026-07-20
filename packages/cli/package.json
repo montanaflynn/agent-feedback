@@ -1,0 +1,37 @@
+{
+  "name": "@agent-feedback/cli",
+  "version": "0.1.0",
+  "description": "Install and run Agent Feedback.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/montanaflynn/agent-feedback.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/montanaflynn/agent-feedback#readme",
+  "bugs": "https://github.com/montanaflynn/agent-feedback/issues",
+  "type": "module",
+  "bin": {
+    "agent-feedback": "dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "clean": "rm -rf dist"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

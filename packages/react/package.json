@@ -1,0 +1,36 @@
+{
+  "name": "@agent-feedback/react",
+  "version": "0.1.0",
+  "description": "Optional React metadata provider for Agent Feedback.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/montanaflynn/agent-feedback.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://github.com/montanaflynn/agent-feedback#readme",
+  "bugs": "https://github.com/montanaflynn/agent-feedback/issues",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@agent-feedback/core": "^0.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
