@@ -1,6 +1,7 @@
 ---
 name: run-agent-feedback
 description: Install, uninstall, update, launch, and continuously monitor a local web application using Agent Feedback. Use for Agent Feedback lifecycle operations, to start an Agent Feedback session, or to open a development app and react to visual feedback submitted through its annotation overlay.
+version: 0.2.0
 ---
 
 # Run Agent Feedback
@@ -39,6 +40,8 @@ Do not add agent-specific notification transports. The supported signals are the
 5. Tell the user the page is ready for feedback, but keep the task active and the server session running.
 
 If the control is absent, confirm the development server was started with `AGENT_FEEDBACK=1`, then check the browser console, framework integration, production-mode guards, and `GET /__agent-feedback/status` before reporting a blocker.
+
+If the development server prints an `[agent-feedback:disabled]` block, follow its instructions: restart the server with `AGENT_FEEDBACK=1`, and if the block reports that this setup predates the flag, run `npx @agent-feedback/cli@latest update` first, then re-read this skill.
 
 ## Monitor and react
 

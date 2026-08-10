@@ -6,12 +6,18 @@ afterEach(() => {
 });
 
 describe("Vite plugin", () => {
-  it("stays inert without AGENT_FEEDBACK=1", () => {
-    const plugin = agentFeedback();
+  it("stays inert without AGENT_FEEDBACK=1 and logs why", () => {
+    const logs: string[] = [];
+    const plugin = agentFeedback({ log: (message) => logs.push(message) });
 
     expect(plugin.name).toBe("agent-feedback");
     expect(plugin.transformIndexHtml).toBeUndefined();
-    expect(plugin.configureServer).toBeUndefined();
+    if (typeof plugin.configureServer !== "function") {
+      throw new Error("Expected a configureServer hook.");
+    }
+    plugin.configureServer.call({} as never, {} as never);
+    expect(logs[0]).toContain("[agent-feedback:disabled]");
+    expect(logs[0]).toContain("AGENT_FEEDBACK=1");
   });
 
   it("injects the resolvable virtual-module URL when enabled", () => {

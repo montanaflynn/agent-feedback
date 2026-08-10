@@ -23,6 +23,13 @@ Off by default, and no app-code edits for Next.js.
 - The legacy `<AgentFeedback />` + route-file integration remains supported for
   Next versions before 15.3; `@agent-feedback/next/route` now also exports a
   `GET` status handler.
+- When the dev server starts without the flag, it prints an
+  `[agent-feedback:disabled]` block explaining how to enable it. Installed
+  skills now record the release that wrote them (`version:` frontmatter,
+  stamped by the CLI); if the packages were bumped directly without
+  `agent-feedback update`, the block detects the outdated workflow and tells
+  the agent to run the update first. The browser console gets an equivalent
+  warning for legacy Next installs.
 
 ## 0.1.0 — 2026-08-07
 

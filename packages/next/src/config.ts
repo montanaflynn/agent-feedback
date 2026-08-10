@@ -1,8 +1,11 @@
 import {
   deterministicPort,
+  formatDisabledNotice,
   isAgentFeedbackEnabled,
   startBrokerServer
 } from "@agent-feedback/core/server";
+
+let noticePrinted = false;
 
 interface Rewrite {
   destination: string;
@@ -32,7 +35,14 @@ export function withAgentFeedback<Config extends ConfigWithRewrites>(
   options: WithAgentFeedbackOptions = {}
 ): Config {
   if (process.env.NODE_ENV === "production") return config;
-  if (!isAgentFeedbackEnabled()) return config;
+  if (!isAgentFeedbackEnabled()) {
+    // Turbopack can evaluate the configuration more than once per process.
+    if (process.env.NODE_ENV === "development" && !noticePrinted) {
+      noticePrinted = true;
+      console.log(formatDisabledNotice(options.cwd));
+    }
+    return config;
+  }
 
   const cwd = options.cwd ?? process.cwd();
   const port = options.port ?? deterministicPort(cwd);
