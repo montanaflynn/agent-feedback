@@ -1,10 +1,26 @@
-import { FeedbackBroker } from "@agent-feedback/core/server";
+import {
+  FeedbackBroker,
+  isAgentFeedbackEnabled
+} from "@agent-feedback/core/server";
 import type { FeedbackSubmission } from "@agent-feedback/core";
 
 const broker = new FeedbackBroker();
 
+function disabled(): boolean {
+  return (
+    process.env.NODE_ENV === "production" || !isAgentFeedbackEnabled()
+  );
+}
+
+export async function GET(): Promise<Response> {
+  if (disabled()) {
+    return Response.json({ error: "Not found." }, { status: 404 });
+  }
+  return Response.json({ status: "ok" });
+}
+
 export async function POST(request: Request): Promise<Response> {
-  if (process.env.NODE_ENV === "production") {
+  if (disabled()) {
     return Response.json({ error: "Not found." }, { status: 404 });
   }
 

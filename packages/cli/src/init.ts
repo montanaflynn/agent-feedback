@@ -2,6 +2,11 @@ import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
+import {
+  ensureInstrumentationClient,
+  wrapNextConfig
+} from "./next-config.js";
+import { removeLegacyNextSetup } from "./next-legacy.js";
 import { installLocalSkill, type SkillTarget } from "./skill.js";
 
 export type Framework = "next" | "vite";
@@ -25,6 +30,7 @@ export interface InitResult {
   files: string[];
   framework: Framework;
   packages: string[];
+  skipped: string[];
 }
 
 export async function initializeProject(
@@ -58,13 +64,19 @@ export async function initializeProject(
     );
   }
 
-  const files =
-    framework === "next"
-      ? await configureNext(options.cwd)
-      : await configureVite(options.cwd, react);
+  const backups: string[] = [];
+  const skipped: string[] = [];
+  let files: string[];
+  if (framework === "next") {
+    const next = await configureNext(options.cwd);
+    files = next.files;
+    backups.push(...next.backups);
+    skipped.push(...next.skipped);
+  } else {
+    files = await configureVite(options.cwd, react);
+  }
   const gitignore = await ensureGitignore(options.cwd);
   if (gitignore) files.push(gitignore);
-  const backups: string[] = [];
   if (options.skill !== false) {
     const skill = await installLocalSkill({
       backup: options.backupSkill,
@@ -83,8 +95,14 @@ export async function initializeProject(
       ? `Agent Feedback updated for ${framework}.`
       : `Agent Feedback configured for ${framework}.`
   );
+  log(
+    "Everything stays off until the development server runs with AGENT_FEEDBACK=1."
+  );
   log("Feedback will be written to .agent-feedback/feedback.jsonl and stdout.");
-  return { backups, files, framework, packages };
+  if (skipped.length > 0) {
+    log(`Review setup that could not be migrated automatically: ${skipped.join(", ")}.`);
+  }
+  return { backups, files, framework, packages, skipped };
 }
 
 export function withPackageTag(
@@ -172,57 +190,16 @@ async function configureVite(cwd: string, react: boolean): Promise<string[]> {
   return [relative];
 }
 
-async function configureNext(cwd: string): Promise<string[]> {
-  const appDirectory = existsSync(join(cwd, "src", "app"))
-    ? join(cwd, "src", "app")
-    : join(cwd, "app");
-  const layoutCandidates = ["layout.tsx", "layout.jsx"];
-  const layoutName = layoutCandidates.find((candidate) =>
-    existsSync(join(appDirectory, candidate))
-  );
-  if (!layoutName) {
-    throw new Error(
-      "Next.js App Router layout not found. Agent Feedback currently requires app/layout.tsx."
-    );
-  }
-
-  const layoutPath = join(appDirectory, layoutName);
-  let layout = await readFile(layoutPath, "utf8");
-  if (!layout.includes("@agent-feedback/next")) {
-    layout = `import { AgentFeedback } from "@agent-feedback/next";\n${layout}`;
-    if (!layout.includes("</body>")) {
-      throw new Error(`${layoutName} must contain a </body> element.`);
-    }
-    layout = layout.replace("</body>", "        <AgentFeedback />\n      </body>");
-    await writeFile(layoutPath, layout);
-  }
-
-  const routeDirectory = join(appDirectory, "%5F_agent-feedback");
-  const { mkdir } = await import("node:fs/promises");
-  await mkdir(routeDirectory, { recursive: true });
-  const routePath = join(routeDirectory, "route.ts");
-  if (!existsSync(routePath)) {
-    await writeFile(
-      routePath,
-      'export { POST } from "@agent-feedback/next/route";\n'
-    );
-  }
-
-  const resolveDirectory = join(routeDirectory, "[id]");
-  await mkdir(resolveDirectory, { recursive: true });
-  const resolvePath = join(resolveDirectory, "route.ts");
-  if (!existsSync(resolvePath)) {
-    await writeFile(
-      resolvePath,
-      'export { PATCH } from "@agent-feedback/next/resolve";\n'
-    );
-  }
-
-  return [
-    layoutPath.slice(cwd.length + 1),
-    routePath.slice(cwd.length + 1),
-    resolvePath.slice(cwd.length + 1)
-  ];
+async function configureNext(
+  cwd: string
+): Promise<{ backups: string[]; files: string[]; skipped: string[] }> {
+  // Pre-0.2.0 installs edited app/layout.tsx and created route files; migrate
+  // them away before applying the config-only wiring.
+  const legacy = await removeLegacyNextSetup(cwd);
+  const files = [...legacy.files];
+  files.push(await wrapNextConfig(cwd));
+  files.push(await ensureInstrumentationClient(cwd));
+  return { backups: legacy.backups, files, skipped: legacy.skipped };
 }
 
 function installPackages(

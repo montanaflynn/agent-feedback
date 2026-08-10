@@ -1,4 +1,9 @@
-import { FeedbackBroker, type BrokerOptions } from "@agent-feedback/core/server";
+import {
+  FeedbackBroker,
+  formatDisabledNotice,
+  isAgentFeedbackEnabled,
+  type BrokerOptions
+} from "@agent-feedback/core/server";
 import type { Plugin } from "vite";
 
 const PUBLIC_ID = "virtual:agent-feedback";
@@ -11,6 +16,19 @@ export interface AgentFeedbackPluginOptions extends BrokerOptions {
 export function agentFeedback(
   options: AgentFeedbackPluginOptions = {}
 ): Plugin {
+  // Off by default: the plugin stays committed in vite.config while remaining
+  // inert until the dev server runs with AGENT_FEEDBACK=1. The startup notice
+  // tells an agent watching stdout why the overlay is absent and how to react.
+  if (!isAgentFeedbackEnabled()) {
+    return {
+      apply: "serve",
+      configureServer() {
+        (options.log ?? console.log)(formatDisabledNotice(options.cwd));
+      },
+      name: "agent-feedback"
+    };
+  }
+
   const broker = new FeedbackBroker(options);
 
   return {

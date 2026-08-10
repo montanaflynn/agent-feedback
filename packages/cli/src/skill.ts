@@ -88,6 +88,29 @@ export function detectSkillTargets(
   return targets.length > 0 ? targets : ["agents"];
 }
 
+/**
+ * The packaged template with its `version:` frontmatter stamped from this
+ * CLI's own package version, so installed skills always record the release
+ * that wrote them.
+ */
+async function renderSkillTemplate(): Promise<string> {
+  const template = await readFile(
+    new URL("../templates/run-agent-feedback/SKILL.md", import.meta.url),
+    "utf8"
+  );
+  try {
+    const manifest = JSON.parse(
+      await readFile(new URL("../package.json", import.meta.url), "utf8")
+    ) as { version?: string };
+    if (manifest.version) {
+      return template.replace(/^version: .*$/m, `version: ${manifest.version}`);
+    }
+  } catch {
+    // Fall back to the template's literal version.
+  }
+  return template;
+}
+
 export async function installLocalSkill(
   options: InstallSkillOptions
 ): Promise<InstallSkillResult> {
@@ -99,10 +122,7 @@ export async function installLocalSkill(
         : (options.targets ?? detectSkillTargets({ cwd: options.cwd }))
     )
   ];
-  const template = await readFile(
-    new URL("../templates/run-agent-feedback/SKILL.md", import.meta.url),
-    "utf8"
-  );
+  const template = await renderSkillTemplate();
   const backups: string[] = [];
   const files: string[] = [];
   const skipped: string[] = [];
@@ -158,10 +178,7 @@ export async function uninstallLocalSkill(
         : (options.targets ?? (Object.keys(SKILL_RELATIVE_PATHS) as SkillTarget[]))
     )
   ];
-  const template = await readFile(
-    new URL("../templates/run-agent-feedback/SKILL.md", import.meta.url),
-    "utf8"
-  );
+  const template = await renderSkillTemplate();
   const backups: string[] = [];
   const files: string[] = [];
 

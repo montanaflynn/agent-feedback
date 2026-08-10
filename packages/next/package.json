@@ -1,6 +1,6 @@
 {
   "name": "@agent-feedback/next",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Next.js integration for Agent Feedback.",
   "license": "MIT",
   "repository": {
@@ -20,6 +20,14 @@
       "types": "./dist/client.d.ts",
       "import": "./dist/client.js"
     },
+    "./auto": {
+      "types": "./dist/auto.d.ts",
+      "import": "./dist/auto.js"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js"
+    },
     "./route": {
       "types": "./dist/route.d.ts",
       "import": "./dist/route.js"
@@ -36,12 +44,12 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup src/client.tsx src/route.ts src/resolve.ts --format esm --dts --clean --splitting false --external react --external next",
+    "build": "tsup src/client.tsx src/auto.ts src/config.ts src/route.ts src/resolve.ts --format esm --dts --clean --splitting false --external react --external next",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@agent-feedback/core": "^0.1.0",
-    "@agent-feedback/react": "^0.1.0"
+    "@agent-feedback/core": "^0.2.0",
+    "@agent-feedback/react": "^0.2.0"
   },
   "peerDependencies": {
     "next": ">=14",

@@ -1,4 +1,7 @@
-import { FeedbackBroker } from "@agent-feedback/core/server";
+import {
+  FeedbackBroker,
+  isAgentFeedbackEnabled
+} from "@agent-feedback/core/server";
 
 const broker = new FeedbackBroker();
 
@@ -10,7 +13,10 @@ export async function PATCH(
   _request: Request,
   context: ResolveContext
 ): Promise<Response> {
-  if (process.env.NODE_ENV === "production") {
+  if (
+    process.env.NODE_ENV === "production" ||
+    !isAgentFeedbackEnabled()
+  ) {
     return Response.json({ error: "Not found." }, { status: 404 });
   }
 

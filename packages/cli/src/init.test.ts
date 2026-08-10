@@ -74,38 +74,96 @@ describe("project initialization", () => {
     ).toContain("name: run-agent-feedback");
   });
 
-  it("adds the component and route to a Next App Router project", async () => {
+  it("wires a Next App Router project through configuration only", async () => {
     const cwd = await temporaryDirectory();
     const app = join(cwd, "src", "app");
     await mkdir(app, { recursive: true });
     await writeFile(
       join(cwd, "package.json"),
-      JSON.stringify({ dependencies: { next: "^15.0.0", react: "^19.0.0" } })
+      JSON.stringify({ dependencies: { next: "^15.3.0", react: "^19.0.0" } })
     );
-    await writeFile(
-      join(app, "layout.tsx"),
-      "export default function Layout({ children }) {\n  return <html><body>{children}</body></html>;\n}\n"
-    );
+    await writeFile(join(cwd, "tsconfig.json"), "{}");
+    const layout =
+      "export default function Layout({ children }) {\n  return <html><body>{children}</body></html>;\n}\n";
+    await writeFile(join(app, "layout.tsx"), layout);
 
-    await initializeProject({
+    const result = await initializeProject({
       cwd,
       install: false,
       log: () => undefined,
       skillTarget: "agents"
     });
 
-    expect(await readFile(join(app, "layout.tsx"), "utf8")).toContain(
-      "<AgentFeedback />"
+    expect(await readFile(join(app, "layout.tsx"), "utf8")).toBe(layout);
+    expect(await readFile(join(cwd, "next.config.mjs"), "utf8")).toContain(
+      'withAgentFeedback({})'
     );
     expect(
-      await readFile(join(app, "%5F_agent-feedback", "route.ts"), "utf8")
-    ).toContain("@agent-feedback/next/route");
+      await readFile(join(cwd, "src", "instrumentation-client.ts"), "utf8")
+    ).toBe('import "@agent-feedback/next/auto";\n');
+    expect(result.files).toContain("next.config.mjs");
+    expect(result.skipped).toEqual([]);
+  });
+
+  it("migrates legacy Next wiring to the configuration style", async () => {
+    const cwd = await temporaryDirectory();
+    const app = join(cwd, "app");
+    const routeDirectory = join(app, "%5F_agent-feedback");
+    await mkdir(join(routeDirectory, "[id]"), { recursive: true });
+    await writeFile(
+      join(cwd, "package.json"),
+      JSON.stringify({ dependencies: { next: "^15.3.0", react: "^19.0.0" } })
+    );
+    await writeFile(join(cwd, "tsconfig.json"), "{}");
+    await writeFile(
+      join(app, "layout.tsx"),
+      [
+        'import { AgentFeedback } from "@agent-feedback/next";',
+        "export default function Layout({ children }) {",
+        "  return <html><body>{children}<AgentFeedback /></body></html>;",
+        "}",
+        ""
+      ].join("\n")
+    );
+    await writeFile(
+      join(routeDirectory, "route.ts"),
+      'export { POST } from "@agent-feedback/next/route";\n'
+    );
+    await writeFile(
+      join(routeDirectory, "[id]", "route.ts"),
+      'export { PATCH } from "@agent-feedback/next/resolve";\n'
+    );
+    await writeFile(
+      join(cwd, "next.config.mjs"),
+      "export default { reactStrictMode: true };\n"
+    );
+
+    const result = await initializeProject({
+      cwd,
+      install: false,
+      log: () => undefined,
+      skillTarget: "agents"
+    });
+
+    const layout = await readFile(join(app, "layout.tsx"), "utf8");
+    expect(layout).not.toContain("AgentFeedback");
+    await expect(
+      readFile(join(routeDirectory, "route.ts"), "utf8")
+    ).rejects.toThrow();
+    const config = await readFile(join(cwd, "next.config.mjs"), "utf8");
+    expect(config).toContain(
+      'import { withAgentFeedback } from "@agent-feedback/next/config";'
+    );
+    expect(config).toContain(
+      "const agentFeedbackConfig = { reactStrictMode: true };"
+    );
+    expect(config).toContain(
+      "export default withAgentFeedback(agentFeedbackConfig);"
+    );
     expect(
-      await readFile(
-        join(app, "%5F_agent-feedback", "[id]", "route.ts"),
-        "utf8"
-      )
-    ).toContain("@agent-feedback/next/resolve");
+      await readFile(join(cwd, "instrumentation-client.ts"), "utf8")
+    ).toBe('import "@agent-feedback/next/auto";\n');
+    expect(result.skipped).toEqual([]);
   });
 
   it("uses the requested Claude skill directory", async () => {

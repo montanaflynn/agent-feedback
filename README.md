@@ -31,7 +31,7 @@ Explaining a UI change to a coding agent in prose is slow and lossy — "the thi
 
 Agent Feedback adds a development-only **◎ Annotate** overlay to your app. Click an element, say what you want, and a structured record — selector, component, page, instruction — lands in your dev server's stdout, where an agent is already watching. No screenshots, no copy-pasted selectors, no hand-written prompt.
 
-Everything is local. Feedback lives in `.agent-feedback/feedback.jsonl` and your development server logs; there is no hosted service, no account, and nothing ships in production builds.
+Everything is local and off by default. The overlay and endpoints only exist while the dev server runs with `AGENT_FEEDBACK=1` — the committed setup is inert for teammates who don't opt in, and nothing ships in production builds. Feedback lives in `.agent-feedback/feedback.jsonl` and your development server logs; there is no hosted service and no account.
 
 ## Quickstart
 
@@ -41,11 +41,19 @@ From an app using Vite or the Next.js App Router:
 npx @agent-feedback/cli@latest install
 ```
 
-Restart your dev server, then:
+Start your dev server with the flag that turns the loop on:
+
+```sh
+AGENT_FEEDBACK=1 npm run dev
+```
+
+Then:
 
 1. Click **◎ Annotate** (bottom-right, development only)
 2. Hover and click an element
 3. Describe the change and press **Send**
+
+Without `AGENT_FEEDBACK=1` nothing mounts and every endpoint 404s, so installing Agent Feedback changes nothing for teammates until they (or their agent) opt in. The bundled skill starts the dev server with the flag automatically; humans can put it in `.env.local` or their shell.
 
 Nested elements normalize to an interactive ancestor — selecting a `span` inside a button targets the button. The installer also drops a `run-agent-feedback` skill into your project so your agent knows to keep the dev server attached, watch for feedback, implement each request, and mark it resolved:
 
@@ -126,36 +134,26 @@ Omit `{ react: true }` for Vue, Svelte, Solid, Preact, or plain HTML. Element se
 npm install --save-dev @agent-feedback/next
 ```
 
-Render the development-only client in the root layout:
+No app code changes are needed — only configuration. Wrap `next.config`:
 
-```tsx
-import { AgentFeedback } from "@agent-feedback/next";
+```js
+// next.config.mjs
+import { withAgentFeedback } from "@agent-feedback/next/config";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <body>
-        {children}
-        <AgentFeedback />
-      </body>
-    </html>
-  );
-}
+export default withAgentFeedback({
+  /* your existing config */
+});
 ```
 
-Create `app/%5F_agent-feedback/route.ts` (or the equivalent under `src/app`). Next.js decodes the escaped leading underscore, so the public URL remains `/__agent-feedback`:
+And create `instrumentation-client.ts` (or add the import to your existing one; requires Next 15.3+):
 
 ```ts
-export { POST } from "@agent-feedback/next/route";
+import "@agent-feedback/next/auto";
 ```
 
-Also create `app/%5F_agent-feedback/[id]/route.ts`:
+When the dev server runs with `AGENT_FEEDBACK=1`, the wrapper starts a local feedback broker and rewrites `/__agent-feedback` to it; the client probes that endpoint and mounts the overlay only when it answers. In production builds — or without the flag — both are inert.
 
-```ts
-export { PATCH } from "@agent-feedback/next/resolve";
-```
-
-Both the overlay and routes return `404` or render nothing in production.
+For projects on Next older than 15.3, the previous integration still works: render `<AgentFeedback />` from `@agent-feedback/next` in the root layout and export the `GET`/`POST` and `PATCH` handlers from `@agent-feedback/next/route` and `@agent-feedback/next/resolve` in `app/%5F_agent-feedback/` route files.
 
 </details>
 
@@ -178,6 +176,10 @@ Removes the framework wiring, the `@agent-feedback/*` packages, and both possibl
 Restart the development server after any lifecycle operation.
 
 ## HTTP API
+
+All endpoints exist only in development and only while the server runs with `AGENT_FEEDBACK=1`; otherwise they return `404`.
+
+`GET /__agent-feedback/status` answers `{ "status": "ok" }` — the overlay probes it before mounting, and agents can use it to confirm the loop is live.
 
 `POST /__agent-feedback` accepts:
 
