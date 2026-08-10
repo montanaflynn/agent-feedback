@@ -6,14 +6,25 @@ Next.js App Router integration for Agent Feedback.
 npm install --save-dev @agent-feedback/next
 ```
 
-Render `AgentFeedback` in the root layout, then export the included `POST` and
-`PATCH` handlers from `app/%5F_agent-feedback/route.ts` and
-`app/%5F_agent-feedback/[id]/route.ts`.
+Configuration-only wiring — no app code changes. Wrap `next.config`:
 
-The client and handlers are development-only. For automatic configuration, run:
+```js
+import { withAgentFeedback } from "@agent-feedback/next/config";
+
+export default withAgentFeedback({});
+```
+
+And create `instrumentation-client.ts` (Next 15.3+):
+
+```ts
+import "@agent-feedback/next/auto";
+```
+
+Everything stays inert unless the dev server runs with `AGENT_FEEDBACK=1`, and
+nothing ships in production builds. For automatic configuration, run:
 
 ```bash
-npx @agent-feedback/cli init
+npx @agent-feedback/cli install
 ```
 
 See the [Agent Feedback repository](https://github.com/montanaflynn/agent-feedback) for full documentation.

@@ -96,6 +96,49 @@ describe("project uninstallation", () => {
     await expect(readFile(claudeSkill, "utf8")).rejects.toThrow();
   });
 
+  it("removes configuration-style Next wiring", async () => {
+    const cwd = await temporaryDirectory();
+    await writeFile(
+      join(cwd, "package.json"),
+      JSON.stringify({
+        dependencies: {
+          "@agent-feedback/next": "^0.2.0",
+          next: "^15.3.0",
+          react: "^19.0.0"
+        }
+      })
+    );
+    await writeFile(
+      join(cwd, "next.config.mjs"),
+      [
+        'import { withAgentFeedback } from "@agent-feedback/next/config";',
+        "const agentFeedbackConfig = { reactStrictMode: true };",
+        "export default withAgentFeedback(agentFeedbackConfig);",
+        ""
+      ].join("\n")
+    );
+    await writeFile(
+      join(cwd, "instrumentation-client.ts"),
+      'import "@agent-feedback/next/auto";\n'
+    );
+
+    const result = await uninstallProject({
+      cwd,
+      log: () => undefined,
+      packages: false,
+      skill: false
+    });
+
+    expect(result.framework).toBe("next");
+    expect(result.skipped).toEqual([]);
+    const config = await readFile(join(cwd, "next.config.mjs"), "utf8");
+    expect(config).not.toContain("withAgentFeedback");
+    expect(config).toContain("export default { reactStrictMode: true };");
+    await expect(
+      readFile(join(cwd, "instrumentation-client.ts"), "utf8")
+    ).rejects.toThrow();
+  });
+
   it("removes Next layout wiring and owned route files", async () => {
     const cwd = await temporaryDirectory();
     const app = join(cwd, "src", "app");

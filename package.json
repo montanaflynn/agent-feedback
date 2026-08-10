@@ -1,7 +1,7 @@
 {
   "name": "agent-feedback-monorepo",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Leave comments on your live app. Your coding agent resolves them.",
   "license": "MIT",
   "repository": {
@@ -20,8 +20,8 @@
     "build:examples": "npm run build -w @agent-feedback/example-vite && npm run build -w @agent-feedback/example-next",
     "build:packages": "npm run build -w @agent-feedback/core && npm run build -w @agent-feedback/react && npm run build -w @agent-feedback/vite && npm run build -w @agent-feedback/next && npm run build -w @agent-feedback/cli",
     "clean": "npm run clean --workspaces --if-present",
-    "dev:next": "npm run dev -w @agent-feedback/example-next",
-    "dev:vite": "npm run dev -w @agent-feedback/example-vite",
+    "dev:next": "AGENT_FEEDBACK=1 npm run dev -w @agent-feedback/example-next",
+    "dev:vite": "AGENT_FEEDBACK=1 npm run dev -w @agent-feedback/example-vite",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm test && npm run build"

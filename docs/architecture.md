@@ -15,8 +15,10 @@ local framework integration
 ```
 
 There is no remote process in this path. The Vite integration registers the
-broker as development-server middleware. The Next.js integration exposes the
-same broker behavior through an App Router route handler.
+broker as development-server middleware. The Next.js integration starts the
+broker as a small local HTTP listener from the `withAgentFeedback` config
+wrapper and rewrites `/__agent-feedback` to it; the legacy App Router route
+handlers expose the same broker behavior for pre-15.3 projects.
 
 ## Browser boundary
 
@@ -49,12 +51,19 @@ an ID.
 The inbox is project-local and should remain untracked. The installer adds
 `.agent-feedback/` to `.gitignore`.
 
-## Development-only behavior
+## Development-only, off-by-default behavior
 
-Vite applies the plugin only while serving. The Next client does not load the
-overlay outside development, and the Next route rejects production requests.
-Agent Feedback is not intended to become an application feature or production
-dependency.
+Everything is double-gated. The first gate is the `AGENT_FEEDBACK=1` environment
+variable on the development server process: without it the Vite plugin is inert,
+the Next config wrapper returns the configuration untouched, the endpoints
+return 404, and the client probe (`GET /__agent-feedback/status`) fails so the
+overlay never mounts. This keeps a committed installation invisible to
+teammates and environments that have not opted in; the bundled skill opts in by
+launching the dev server with the flag. The second gate is the existing
+development-only behavior: Vite applies the plugin only while serving, the
+client code is behind statically-eliminated `NODE_ENV` checks, and the broker
+never starts in production builds. Agent Feedback is not intended to become an
+application feature or production dependency.
 
 ## Transport decision
 

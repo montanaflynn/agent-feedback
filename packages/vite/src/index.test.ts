@@ -1,8 +1,21 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { agentFeedback } from "./index.js";
 
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
 describe("Vite plugin", () => {
-  it("injects the resolvable virtual-module URL", () => {
+  it("stays inert without AGENT_FEEDBACK=1", () => {
+    const plugin = agentFeedback();
+
+    expect(plugin.name).toBe("agent-feedback");
+    expect(plugin.transformIndexHtml).toBeUndefined();
+    expect(plugin.configureServer).toBeUndefined();
+  });
+
+  it("injects the resolvable virtual-module URL when enabled", () => {
+    vi.stubEnv("AGENT_FEEDBACK", "1");
     const plugin = agentFeedback();
     const transform = plugin.transformIndexHtml;
     if (!transform || typeof transform === "function") {

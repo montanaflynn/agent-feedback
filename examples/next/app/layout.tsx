@@ -1,4 +1,3 @@
-import { AgentFeedback } from "@agent-feedback/next";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -12,10 +11,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>
-        {children}
-        <AgentFeedback />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

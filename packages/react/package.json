@@ -1,6 +1,6 @@
 {
   "name": "@agent-feedback/react",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Optional React metadata provider for Agent Feedback.",
   "license": "MIT",
   "repository": {
@@ -28,7 +28,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@agent-feedback/core": "^0.1.0"
+    "@agent-feedback/core": "^0.2.0"
   },
   "engines": {
     "node": ">=20"

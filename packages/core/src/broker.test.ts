@@ -47,6 +47,12 @@ describe("FeedbackBroker", () => {
     const endpoint = `http://127.0.0.1:${address.port}/__agent-feedback`;
 
     try {
+      const status = await fetch(`${endpoint}/status`, {
+        headers: { connection: "close" }
+      });
+      expect(status.status).toBe(200);
+      expect(await status.json()).toEqual({ status: "ok" });
+
       const response = await fetch(endpoint, {
         body: JSON.stringify(submission()),
         headers: {

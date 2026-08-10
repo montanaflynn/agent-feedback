@@ -1,4 +1,8 @@
-import { FeedbackBroker, type BrokerOptions } from "@agent-feedback/core/server";
+import {
+  FeedbackBroker,
+  isAgentFeedbackEnabled,
+  type BrokerOptions
+} from "@agent-feedback/core/server";
 import type { Plugin } from "vite";
 
 const PUBLIC_ID = "virtual:agent-feedback";
@@ -11,6 +15,12 @@ export interface AgentFeedbackPluginOptions extends BrokerOptions {
 export function agentFeedback(
   options: AgentFeedbackPluginOptions = {}
 ): Plugin {
+  // Off by default: the plugin stays committed in vite.config while remaining
+  // inert until the dev server runs with AGENT_FEEDBACK=1.
+  if (!isAgentFeedbackEnabled()) {
+    return { apply: "serve", name: "agent-feedback" };
+  }
+
   const broker = new FeedbackBroker(options);
 
   return {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { probeAndMount } from "./mount.js";
 
 export function AgentFeedback(): null {
   useEffect(() => {
@@ -8,14 +9,13 @@ export function AgentFeedback(): null {
 
     let disposed = false;
     let destroy: (() => void) | undefined;
-    void Promise.all([
-      import("@agent-feedback/core/browser"),
-      import("@agent-feedback/react")
-    ]).then(([core, react]) => {
-      if (disposed) return;
-      core.registerMetadataProvider(react.reactMetadataProvider);
-      const controller = core.mountAgentFeedback();
-      destroy = () => controller.destroy();
+    void probeAndMount().then((cleanup) => {
+      if (!cleanup) return;
+      if (disposed) {
+        cleanup();
+        return;
+      }
+      destroy = cleanup;
     });
 
     return () => {

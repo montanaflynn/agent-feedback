@@ -70,6 +70,14 @@ export class FeedbackBroker {
       }
 
       try {
+        if (
+          request.method === "GET" &&
+          url.pathname === "/__agent-feedback/status"
+        ) {
+          writeJson(response, 200, { status: "ok" });
+          return;
+        }
+
         if (request.method === "POST" && url.pathname === "/__agent-feedback") {
           const submission = (await readJson(request)) as FeedbackSubmission;
           const record = await this.submit(submission);
