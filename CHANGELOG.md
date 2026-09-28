@@ -3,6 +3,17 @@
 All packages (`@agent-feedback/core`, `react`, `vite`, `next`, `cli`) are
 versioned in lockstep.
 
+## 0.2.1 — 2026-09-28
+
+- **Security**: the broker accepted feedback from any website open in the
+  browser. It answered every request with `access-control-allow-origin: *`,
+  and a cross-origin `text/plain` POST needs no preflight, so another page
+  could add a feedback item that the agent would then carry out. The broker
+  now refuses a request whose `Sec-Fetch-Site` names another site (`403`),
+  refuses a `POST` that is not `application/json` (`415`), and sends no CORS
+  headers. The overlay and the agent's `curl` are unaffected. Upgrade with
+  `npx @agent-feedback/cli@latest update`.
+
 ## 0.2.0 — 2026-08-10
 
 Off by default, and no app-code edits for Next.js.

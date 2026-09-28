@@ -1,7 +1,7 @@
 ---
 name: run-agent-feedback
 description: Install, uninstall, update, launch, and continuously monitor a local web application using Agent Feedback. Use for Agent Feedback lifecycle operations, to start an Agent Feedback session, or to open a development app and react to visual feedback submitted through its annotation overlay.
-version: 0.2.0
+version: 0.2.1
 ---
 
 # Run Agent Feedback

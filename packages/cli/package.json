@@ -1,6 +1,6 @@
 {
   "name": "@agent-feedback/cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Install and run Agent Feedback.",
   "license": "MIT",
   "repository": {

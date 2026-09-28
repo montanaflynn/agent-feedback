@@ -179,6 +179,8 @@ Restart the development server after any lifecycle operation.
 
 All endpoints exist only in development and only while the server runs with `AGENT_FEEDBACK=1`; otherwise they return `404`.
 
+Feedback becomes instructions for your agent, so the endpoints accept it only from the app's own pages: a request whose `Sec-Fetch-Site` names another site gets `403`, a `POST` that is not `application/json` gets `415`, and no CORS headers are sent, so a cross-origin preflight fails. Requests without `Sec-Fetch-Site`, such as the agent's `curl`, are not from a browser page and are accepted.
+
 `GET /__agent-feedback/status` answers `{ "status": "ok" }` — the overlay probes it before mounting, and agents can use it to confirm the loop is live.
 
 `POST /__agent-feedback` accepts:

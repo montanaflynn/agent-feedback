@@ -64,8 +64,16 @@ export class FeedbackBroker {
         return;
       }
 
+      // No CORS headers anywhere: a preflight from another origin fails,
+      // so only the app's own pages can send JSON or PATCH.
       if (request.method === "OPTIONS") {
         writeJson(response, 204, undefined);
+        return;
+      }
+
+      const refusal = crossSiteRefusal(request);
+      if (refusal) {
+        writeJson(response, 403, { error: refusal });
         return;
       }
 
@@ -79,6 +87,12 @@ export class FeedbackBroker {
         }
 
         if (request.method === "POST" && url.pathname === "/__agent-feedback") {
+          if (!isJson(request)) {
+            writeJson(response, 415, {
+              error: "Feedback must be sent as application/json."
+            });
+            return;
+          }
           const submission = (await readJson(request)) as FeedbackSubmission;
           const record = await this.submit(submission);
           writeJson(response, 201, { id: record.id, status: record.status });
@@ -145,6 +159,30 @@ function validateSubmission(value: FeedbackSubmission): void {
   }
 }
 
+/**
+ * Feedback becomes instructions for a coding agent, so it is accepted only
+ * from the app's own pages. Browsers set Sec-Fetch-Site themselves and pages
+ * cannot change it; a request with none (curl, the agent's PATCH) is not from
+ * a browser page. Checked on the header rather than Origin against Host,
+ * which a proxy in front of the broker (the Next.js rewrite) changes.
+ */
+function crossSiteRefusal(request: IncomingMessage): string | undefined {
+  const site = request.headers["sec-fetch-site"];
+  if (site === undefined || site === "same-origin" || site === "none") {
+    return undefined;
+  }
+  return "Feedback is only accepted from the app's own pages.";
+}
+
+/**
+ * A cross-origin text/plain or form POST needs no preflight, so a POST in
+ * any other type could come from any page the browser has open.
+ */
+function isJson(request: IncomingMessage): boolean {
+  const type = request.headers["content-type"] ?? "";
+  return type.split(";")[0]?.trim().toLowerCase() === "application/json";
+}
+
 async function readJson(request: IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = [];
   let bytes = 0;
@@ -167,9 +205,6 @@ function writeJson(
   body: unknown
 ): void {
   response.statusCode = status;
-  response.setHeader("access-control-allow-headers", "content-type");
-  response.setHeader("access-control-allow-methods", "POST, PATCH, OPTIONS");
-  response.setHeader("access-control-allow-origin", "*");
   if (status === 204) {
     response.end();
     return;
