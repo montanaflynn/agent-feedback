@@ -1,6 +1,6 @@
 {
   "name": "@agent-feedback/core",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Framework-independent overlay, broker, and feedback payload utilities.",
   "license": "MIT",
   "repository": {

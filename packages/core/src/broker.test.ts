@@ -87,6 +87,77 @@ describe("FeedbackBroker", () => {
     }
   });
 
+  it("refuses feedback from other sites", async () => {
+    const cwd = await temporaryDirectory();
+    const broker = new FeedbackBroker({ cwd, log: () => undefined });
+    const server = createServer(broker.middleware());
+    server.listen(0, "127.0.0.1");
+    await once(server, "listening");
+    const address = server.address();
+    if (!address || typeof address === "string") throw new Error("No test port.");
+    const endpoint = `http://127.0.0.1:${address.port}/__agent-feedback`;
+    const body = JSON.stringify(submission());
+
+    try {
+      const post = (headers: Record<string, string>) =>
+        fetch(endpoint, {
+          body,
+          headers: { connection: "close", ...headers },
+          method: "POST"
+        });
+
+      // A page on another site: refused whatever the type.
+      for (const site of ["cross-site", "same-site"]) {
+        const response = await post({
+          "content-type": "application/json",
+          "sec-fetch-site": site
+        });
+        expect(response.status).toBe(403);
+      }
+
+      // No preflight is needed for these, so they could come from anywhere.
+      for (const type of [
+        "text/plain",
+        "application/x-www-form-urlencoded",
+        "multipart/form-data; boundary=x"
+      ]) {
+        expect((await post({ "content-type": type })).status).toBe(415);
+      }
+
+      const preflight = await fetch(endpoint, {
+        headers: {
+          "access-control-request-method": "POST",
+          connection: "close",
+          origin: "https://elsewhere.example"
+        },
+        method: "OPTIONS"
+      });
+      expect(preflight.headers.get("access-control-allow-origin")).toBeNull();
+
+      const resolve = await fetch(`${endpoint}/af_abc`, {
+        headers: { connection: "close", "sec-fetch-site": "cross-site" },
+        method: "PATCH"
+      });
+      expect(resolve.status).toBe(403);
+
+      const own = await post({
+        "content-type": "application/json; charset=utf-8",
+        "sec-fetch-site": "same-origin"
+      });
+      expect(own.status).toBe(201);
+
+      const lines = (
+        await readFile(join(cwd, ".agent-feedback", "feedback.jsonl"), "utf8")
+      )
+        .trim()
+        .split("\n");
+      expect(lines).toHaveLength(1);
+    } finally {
+      server.close();
+      server.closeAllConnections();
+    }
+  });
+
   it("rejects incomplete submissions", async () => {
     const cwd = await temporaryDirectory();
     const broker = new FeedbackBroker({ cwd, log: () => undefined });
